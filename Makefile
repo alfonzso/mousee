@@ -5,7 +5,7 @@ BINARY_NAME=mousee.exe
 SOURCE_FILE=main.go
 
 # Default target: remove, build, and run
-all: kill remove build run
+all: remove build run
 
 # Remove the binary if it exists
 remove:

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"syscall"
 	"time"
 	"unsafe"
@@ -28,6 +27,7 @@ const (
 	WH_MOUSE_LL    = 14
 	WM_LBUTTONDOWN = 0x0201
 	WM_RBUTTONDOWN = 0x0204
+	MK_MBUTTON     = 0x0207
 )
 
 type POINT struct {
@@ -42,25 +42,47 @@ type MouseLLHookStruct struct {
 	ExtraInfo uintptr
 }
 
+var mouseDebugMode = 0
+
 func LowLevelMouseProc(nCode int32, wParam, lParam uintptr) uintptr {
+	cont := true
 	if nCode == 0 {
 		// Intercept left and right mouse button down events
-		if false && wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN {
+		if mouseDebugMode < 5 && (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN) {
 			log.Println("Mouse click blocked!")
-			return 1 // Block the event
+			// return 1 // Block the event
+			cont = false
 		}
+		// if wParam == WM_LBUTTONDOWN || wParam == MK_MBUTTON {
+		// 	log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+		// }
+		if wParam == MK_MBUTTON {
+			mouseDebugMode += 1
+			if mouseDebugMode >= 5 {
+				log.Println("Debug mode active for mouse", mouseDebugMode)
+			}
+			if mouseDebugMode > 10 {
+				mouseDebugMode = 0
+			}
+			// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+		}
+		// log.Println(">>>>>>>>>>>", wParam)
+	}
+
+	if !cont {
+		return 1
 	}
 
 	ret, _, _ := procCallNextHookEx.Call(0, uintptr(nCode), wParam, lParam)
 	return ret
 }
 
-func MousePosHook(u server.UdpConfig) error {
+func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal) error {
 
 	mouseChan := make(chan types.MouseEvent, 100)
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
+	// signalChan := make(chan os.Signal, 1)
+	// signal.Notify(signalChan, os.Interrupt)
 
 	res := u.IsClientConnected(signalChan)
 	if !res {
@@ -86,7 +108,6 @@ func MousePosHook(u server.UdpConfig) error {
 			return nil
 		case m := <-mouseChan:
 			msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
-
 			u.SendResponse(msg)
 			continue
 		}
