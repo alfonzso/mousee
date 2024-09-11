@@ -57,9 +57,9 @@ func (u *UdpConfig) StartServer() {
 
 	u.ServeUDP()
 	u.ClientConnected <- false
-	_, remoteaddr, err := u.Conn.ReadFromUDP(p)
+	readLen, remoteaddr, err := u.Conn.ReadFromUDP(p)
 
-	fmt.Printf("Read a message from %v %s \n", remoteaddr, p)
+	fmt.Printf("Read a message from %v %s \n", remoteaddr, p[:readLen])
 	if err != nil {
 		fmt.Printf("Some error  %v", err)
 	}

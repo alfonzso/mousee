@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/alfonzso/mousee/common"
 	"github.com/alfonzso/mousee/server"
 	"github.com/moutend/go-hook/pkg/mouse"
 	"github.com/moutend/go-hook/pkg/types"
@@ -107,8 +109,13 @@ func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal) error {
 			fmt.Println("Received shutdown signal")
 			return nil
 		case m := <-mouseChan:
-			msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
-			u.SendResponse(msg)
+			// msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
+			// msg := fmt.Sprintf("%v %v", m.X, m.Y)
+			// md := common.MouseData{m.X, m.Y}
+			b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y})
+			if err == nil {
+				u.SendResponse(string(b) + "\n")
+			}
 			continue
 		}
 	}

@@ -2,11 +2,21 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
+
+	"github.com/alfonzso/mousee/common"
+
+	"github.com/go-vgo/robotgo"
+	_ "github.com/go-vgo/robotgo/base"
+	_ "github.com/go-vgo/robotgo/key"
+	_ "github.com/go-vgo/robotgo/mouse"
+	_ "github.com/go-vgo/robotgo/screen"
+	_ "github.com/go-vgo/robotgo/window"
 )
 
 func ClientMode() {
@@ -22,12 +32,19 @@ func ClientMode() {
 	fmt.Fprintf(conn, "Hi UDP Server, How are you doing?")
 	reader := bufio.NewReader(conn)
 
-	_, err = reader.Read(p)
+	readLen, err := reader.Read(p)
+
+	var mouseData common.MouseData
 
 	for err != io.EOF {
-		fmt.Printf("%s\n", p)
+		// pOK := p[:readLen]
+		if err := json.Unmarshal(p[:readLen], &mouseData); err != nil {
+			panic(err)
+		}
+		// fmt.Println("mouseData", mouseData)
+		robotgo.Move(int(mouseData.X), int(mouseData.Y))
 		p = make([]byte, 1024)
-		_, err = reader.Read(p)
+		readLen, err = reader.Read(p)
 	}
 
 	conn.Close()
