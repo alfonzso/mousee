@@ -43,6 +43,15 @@ func ClientMode() {
 		}
 		// fmt.Println("mouseData", mouseData)
 		robotgo.Move(int(mouseData.X), int(mouseData.Y))
+
+		if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
+			robotgo.Click("left")
+		}
+
+		if uintptr(common.WM_RBUTTONDOWN) == mouseData.Msg {
+			robotgo.Click("right")
+		}
+
 		p = make([]byte, 1024)
 		readLen, err = reader.Read(p)
 	}

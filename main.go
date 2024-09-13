@@ -43,27 +43,44 @@ import (
 
 	"github.com/alfonzso/mousee/client"
 	"github.com/alfonzso/mousee/server"
+	"github.com/moutend/go-hook/pkg/types"
 )
 
-func Flags() bool {
+var buildVersion string
+
+func Flags() (bool, bool) {
 
 	var client bool
+	var update bool
+	var version bool
 
 	flag.BoolVar(&client, "client", false, "Client or Server mode, default Server")
+	flag.BoolVar(&update, "update", false, "Client will update itself from server")
+	flag.BoolVar(&version, "version", false, "Client version")
 
 	flag.Parse()
 
-	return client
+	if version {
+		fmt.Println(buildVersion)
+		os.Exit(0)
+	}
+
+	return client, client && update
 }
 
 var infoLogger = log.New(os.Stdout, "INFO: ", 0)
 
 func main() {
+	cli, update := Flags()
 	// log.SetFlags(0)
 	// log.SetPrefix("error: ")
 	// infoLogger.Println("Client mode active ...")
 
-	if cli := Flags(); cli {
+	if update {
+
+	}
+
+	if cli {
 		client.ClientMode()
 	} else {
 		if err := serverMode(); err != nil {
@@ -74,6 +91,7 @@ func main() {
 
 func serverMode() error {
 
+	mouseChan := make(chan types.MouseEvent, 100)
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 
@@ -87,9 +105,9 @@ func serverMode() error {
 		ClientConnected: make(chan bool),
 	}
 
-	go Mouse()
+	go Mouse(nil, mouseChan)
 
-	go MousePosHook(&u, signalChan)
+	go MousePosHook(&u, signalChan, mouseChan)
 
 	u.StartServer()
 

@@ -15,6 +15,8 @@ import (
 	"github.com/moutend/go-hook/pkg/types"
 )
 
+type HookHandler func(c chan<- types.MouseEvent) types.HOOKPROC
+
 var (
 	user32                  = syscall.NewLazyDLL("user32.dll")
 	procSetWindowsHookEx    = user32.NewProc("SetWindowsHookExW")
@@ -25,12 +27,14 @@ var (
 	hook syscall.Handle
 )
 
-const (
-	WH_MOUSE_LL    = 14
-	WM_LBUTTONDOWN = 0x0201
-	WM_RBUTTONDOWN = 0x0204
-	MK_MBUTTON     = 0x0207
-)
+const WH_MOUSE_LL = 14
+
+// const (
+// 	WH_MOUSE_LL    = 14
+// 	WM_LBUTTONDOWN = 0x0201
+// 	WM_RBUTTONDOWN = 0x0204
+// 	MK_MBUTTON     = 0x0207
+// )
 
 type POINT struct {
 	X, Y int32
@@ -46,42 +50,47 @@ type MouseLLHookStruct struct {
 
 var mouseDebugMode = 0
 
-func LowLevelMouseProc(nCode int32, wParam, lParam uintptr) uintptr {
-	cont := true
-	if nCode == 0 {
-		// Intercept left and right mouse button down events
-		if mouseDebugMode < 5 && (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN) {
-			log.Println("Mouse click blocked!")
-			// return 1 // Block the event
-			cont = false
-		}
-		// if wParam == WM_LBUTTONDOWN || wParam == MK_MBUTTON {
-		// 	log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-		// }
-		if wParam == MK_MBUTTON {
-			mouseDebugMode += 1
-			if mouseDebugMode >= 5 {
-				log.Println("Debug mode active for mouse", mouseDebugMode)
+func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
+	return func(nCode int32, wParam, lParam uintptr) uintptr {
+		cont := true
+		if nCode == 0 {
+			// Intercept left and right mouse button down events
+			if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
+				log.Println("Mouse click blocked!")
+				c <- types.MouseEvent{
+					Message:        types.Message(wParam),
+					MSLLHOOKSTRUCT: *(*types.MSLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
+				}
+				// return 1 // Block the event
+				cont = false
 			}
-			if mouseDebugMode > 10 {
-				mouseDebugMode = 0
+			// if wParam == WM_LBUTTONDOWN || wParam == MK_MBUTTON {
+			// 	log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+			// }
+			// if wParam == MK_MBUTTON {
+			if wParam == uintptr(common.WM_MBUTTON) {
+				mouseDebugMode += 1
+				if mouseDebugMode >= 5 {
+					log.Println("Debug mode active for mouse", mouseDebugMode)
+				}
+				if mouseDebugMode > 10 {
+					mouseDebugMode = 0
+				}
+				// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 			}
-			// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+			// log.Println(">>>>>>>>>>>", wParam)
 		}
-		// log.Println(">>>>>>>>>>>", wParam)
-	}
 
-	if !cont {
-		return 1
-	}
+		if !cont {
+			return 1
+		}
 
-	ret, _, _ := procCallNextHookEx.Call(0, uintptr(nCode), wParam, lParam)
-	return ret
+		ret, _, _ := procCallNextHookEx.Call(0, uintptr(nCode), wParam, lParam)
+		return ret
+	}
 }
 
-func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal) error {
-
-	mouseChan := make(chan types.MouseEvent, 100)
+func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
 
 	// signalChan := make(chan os.Signal, 1)
 	// signal.Notify(signalChan, os.Interrupt)
@@ -112,7 +121,10 @@ func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal) error {
 			// msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
 			// msg := fmt.Sprintf("%v %v", m.X, m.Y)
 			// md := common.MouseData{m.X, m.Y}
-			b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y})
+			// WM_LBUTTONDOWN
+			// types.Message(wParam)
+			fmt.Printf("%v \r", m.Message)
+			b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
 			if err == nil {
 				u.SendResponse(string(b) + "\n")
 			}
@@ -121,11 +133,17 @@ func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal) error {
 	}
 }
 
-func Mouse() {
+// func Mouse() {
+func Mouse(fn HookHandler, c chan<- types.MouseEvent) error {
 	// Set the low-level mouse hook
+
+	if fn == nil {
+		fn = DefaultHookHandler
+	}
+
 	hook, _, err := procSetWindowsHookEx.Call(
 		WH_MOUSE_LL,
-		syscall.NewCallback(LowLevelMouseProc),
+		syscall.NewCallback(fn(c)),
 		0,
 		0,
 	)

@@ -12,7 +12,6 @@ type UdpConfig struct {
 	Conn            *net.UDPConn
 	Remoteaddr      *net.UDPAddr
 	ClientConnected chan bool
-	// clientConnected make(chan string)
 }
 
 // func (u UdpConfig) SendResponse(conn *net.UDPConn, addr *net.UDPAddr, msg string) {
@@ -21,6 +20,7 @@ func (u UdpConfig) SendResponse(msg string) {
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)
 	}
+	// fmt.Printf("%d %d \r", len, err)
 }
 
 func (u *UdpConfig) ServeUDP() bool {
@@ -34,7 +34,6 @@ func (u *UdpConfig) ServeUDP() bool {
 }
 
 // The function will block the runtime until someone connects to us.
-
 func (u UdpConfig) IsClientConnected(signalChan chan os.Signal) bool {
 	for {
 		time.Sleep(100 * time.Millisecond)

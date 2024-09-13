@@ -22,10 +22,12 @@ kill:
 	@taskkill //F //IM $(BINARY_NAME) || echo 1
 
 # Build the Go binary
+# EPOCH=(powershell.exe -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s'); \
+# @echo $(shell -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s')
+
 build:
-		@echo "Building Go binary..."
-		go build .
-		# go build -o $(BINARY_NAME) $(SOURCE_FILE)
+	EPOCH=$$(powershell.exe -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s') ; \
+	go build -ldflags "-X main.buildVersion=v0.0.$$EPOCH" .
 
 # Run the Go binary
 run:
