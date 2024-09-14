@@ -24,10 +24,12 @@ kill:
 # Build the Go binary
 # EPOCH=(powershell.exe -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s'); \
 # @echo $(shell -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s')
+# EPOCH=$$(powershell.exe -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s') ; \
 
 build:
-	EPOCH=$$(powershell.exe -c 'Get-Date -Date ((Get-Date).DateTime) -UFormat %s') ; \
-	go build -ldflags "-X main.buildVersion=v0.0.$$EPOCH" .
+	SHA=$$(powershell.exe -c 'git rev-parse --short HEAD') ; \
+	MMDDHHMM=$$(powershell.exe -c 'Get-Date -Format MMdd.hhmm') ; \
+	go build -ldflags "-X main.appVersion=v$$SHA.$$MMDDHHMM" .
 
 # Run the Go binary
 run:

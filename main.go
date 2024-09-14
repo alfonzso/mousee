@@ -34,6 +34,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"time"
 
 	// "time"
 
@@ -46,7 +47,7 @@ import (
 	"github.com/moutend/go-hook/pkg/types"
 )
 
-var buildVersion string
+var appVersion string
 
 func Flags() (bool, bool) {
 
@@ -56,12 +57,12 @@ func Flags() (bool, bool) {
 
 	flag.BoolVar(&client, "client", false, "Client or Server mode, default Server")
 	flag.BoolVar(&update, "update", false, "Client will update itself from server")
-	flag.BoolVar(&version, "version", false, "Client version")
+	flag.BoolVar(&version, "version", false, "App version")
 
 	flag.Parse()
 
 	if version {
-		fmt.Println(buildVersion)
+		fmt.Println(appVersion)
 		os.Exit(0)
 	}
 
@@ -71,22 +72,33 @@ func Flags() (bool, bool) {
 var infoLogger = log.New(os.Stdout, "INFO: ", 0)
 
 func main() {
-	cli, update := Flags()
+	_, update := Flags()
 	// log.SetFlags(0)
 	// log.SetPrefix("error: ")
 	// infoLogger.Println("Client mode active ...")
 
 	if update {
-
-	}
-
-	if cli {
-		client.ClientMode()
+		client.UpdateMode()
+		os.Exit(0)
 	} else {
-		if err := serverMode(); err != nil {
-			log.Fatal(err)
-		}
+		go server.StartUpdateServer()
 	}
+
+	for {
+		// serve forever
+		time.Sleep(100 * time.Millisecond)
+		// select {
+		// case
+		// }
+	}
+
+	// if cli {
+	// 	client.ClientMode()
+	// } else {
+	// 	if err := serverMode(); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
 }
 
 func serverMode() error {

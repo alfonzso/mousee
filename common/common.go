@@ -12,3 +12,27 @@ type MouseData struct {
 //
 // https://docs.microsoft.com/en-us/windows/win32/winmsg/using-hooks
 type HOOKPROC func(code int32, wParam, lParam uintptr) uintptr
+
+func Check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
+
+func BeginUpdate() string {
+	begin := []rune{'B', 'E', 'G', 'I', 'N', '_', 'U', 'P', 'D', 'A', 'T', 'E'}
+	result := ""
+	for _, v := range begin {
+		result += string(v)
+	}
+	return result
+}
+
+func EndUpdate() string {
+	begin := []rune{'E', 'N', 'D', '_', 'U', 'P', 'D', 'A', 'T', 'E'}
+	result := ""
+	for _, v := range begin {
+		result += string(v)
+	}
+	return result
+}
