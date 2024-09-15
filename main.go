@@ -43,11 +43,10 @@ import (
 	// "time"
 
 	"github.com/alfonzso/mousee/client"
+	"github.com/alfonzso/mousee/common"
 	"github.com/alfonzso/mousee/server"
 	"github.com/moutend/go-hook/pkg/types"
 )
-
-var appVersion string
 
 func Flags() (bool, bool) {
 
@@ -62,7 +61,7 @@ func Flags() (bool, bool) {
 	flag.Parse()
 
 	if version {
-		fmt.Println(appVersion)
+		fmt.Println(common.AppVersion)
 		os.Exit(0)
 	}
 

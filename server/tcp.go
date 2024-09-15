@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -72,20 +73,18 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		// Print the message received from the client
 		fmt.Printf("Received: %s", message)
 
 		if message == "UPDATE" {
 			message = ""
-			// fmt.Println("Goootttt ittttt")
 			conn.Write([]byte(common.BeginUpdate()))
+			b, err := json.Marshal(common.UpdateData{FileName: common.AppName, AppVersion: common.AppVersion})
+			if err == nil {
+				conn.Write(b)
+			}
 			dat, err := os.ReadFile("mousee.exe")
 			common.Check(err)
-			fmt.Printf(">>>>>>>> %d\n", len(dat))
-			n, e := conn.Write(dat)
-			// n, e := conn.Write(dat+ []byte("END_UPDATE"))
-			// n, e := conn.Write(append(dat, []byte("END_UPDATE")...))
-			fmt.Printf(">>>>>>>> %d %v\n", n, e)
+			conn.Write(dat)
 			conn.Write([]byte(common.EndUpdate()))
 		}
 

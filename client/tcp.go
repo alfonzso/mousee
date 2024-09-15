@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -11,7 +12,43 @@ import (
 	"github.com/alfonzso/mousee/common"
 )
 
+// var reader *bufio.Reader
+func readFrom(reader *bufio.Reader, args ...int) (string, error) {
+	size := 1024
+	if len(args) > 0 {
+		size = args[0]
+	}
+	p := make([]byte, size)
+	readLen, err := reader.Read(p)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(p[:readLen])), nil
+}
+
+func readJson(data []byte, v any) {
+	if err := json.Unmarshal(data, v); err != nil {
+		panic(err)
+	}
+}
+
+func removeLastNChar(s string, charCount int) string {
+	return s[:len(s)-4]
+}
+
+func initFileProps(reader *bufio.Reader) *os.File {
+	var updateData common.UpdateData
+	message, err := readFrom(reader)
+	if err != nil {
+		panic(err)
+	}
+	readJson([]byte(message), &updateData)
+	f := common.UpdateFile(updateData.AppVersion + "." + updateData.FileName)
+	return f
+}
+
 func UpdateMode() {
+
 	infoLogger := log.New(os.Stdout, "INFO: ", 0)
 
 	infoLogger.Println("Client mode active ...")
@@ -22,63 +59,41 @@ func UpdateMode() {
 		return
 	}
 	reader := bufio.NewReader(conn)
-	readLen, err := reader.Read(p)
-	message := strings.TrimSpace(string(p[:readLen]))
+	// readLen, err := reader.Read(p)
+	// message := strings.TrimSpace(string(p[:readLen]))
+
+	message, err := readFrom(reader)
 
 	if message != "SUP" || err != nil {
 		infoLogger.Println("EXITING, no SUP :'( ...")
 	}
 
 	fmt.Fprintf(conn, "UPDATE\n")
-
-	readLen, err = reader.Read(p)
-
-	// infoLogger.Println(string(p[:readLen]))
-
-	// var mouseData common.MouseData
-
-	// var
+	// readLen, err = reader.Read(p)
+	message, err = readFrom(reader)
 
 	for err == nil {
-		// pOK := p[:readLen]
-		// if err := json.Unmarshal(p[:readLen], &mouseData); err != nil {
-		// 	panic(err)
-		// }
-
-		message := strings.TrimSpace(string(p[:readLen]))
-
-		// infoLogger.Println("================> ", message)
+		// message := strings.TrimSpace(string(p[:readLen]))
 
 		if message == common.BeginUpdate() {
 			infoLogger.Println("Begin of update")
-			f, err := os.OpenFile("fafa.exe", os.O_APPEND|os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-			// f, err := os.OpenFile("fafa.exe", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-			if err != nil {
-				panic(err)
-			}
+			// message, err = readFrom(reader)
+			// readJson([]byte(message), &updateData)
+			// f := common.UpdateFile(updateData.AppVersion + "." + updateData.FileName)
+			f := initFileProps(reader)
 
-			// f.Truncate(0)
-			// f.Seek(0, 0)
-
-			// for message == "END_UPDATE" {
 			counter := 0
 			for err == nil {
-				p = make([]byte, 1024*1024)
-				readLen, err = reader.Read(p)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				// message = strings.TrimSpace(string(p[:readLen]))
-				// infoLogger.Println("eeeeeee", readLen)
-				// fmt.Printf("> %d  %v     \n", counter, err)
-				if strings.Contains(string(p[:readLen]), common.EndUpdate()) {
-					// fmt.Printf("> %d  %v  %d   \n", counter, err, readLen)
-					// fmt.Printf(">    %v     \n", string(p[:readLen]))
-					finalBytes := p[:readLen-len(common.EndUpdate())]
-					f.Write(finalBytes)
+				// p = make([]byte, 1024*1024)
+				// readLen, err = reader.Read(p)
+				message, err = readFrom(reader)
+				if strings.Contains(message, common.EndUpdate()) {
+					// finalBytes := p[:readLen-len(common.EndUpdate())]
+					finalBytes := removeLastNChar(message, len(common.EndUpdate()))
+					f.Write([]byte(finalBytes))
 					break
 				}
-				f.Write(p[:readLen])
+				f.Write([]byte(message))
 				counter += 1
 			}
 			f.Close()
@@ -86,13 +101,10 @@ func UpdateMode() {
 			break
 		}
 
-		// if err != nil {
-		// 	break
-		// }
-
-		p = make([]byte, 1024)
-		readLen, err = reader.Read(p)
-		infoLogger.Println(string(p[:readLen]))
+		message, err = readFrom(reader)
+		// p = make([]byte, 1024)
+		// readLen, err = reader.Read(p)
+		infoLogger.Println(message)
 
 	}
 

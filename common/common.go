@@ -1,9 +1,19 @@
 package common
 
+import "os"
+
+var AppVersion string
+var AppName string
+
 type MouseData struct {
 	Msg uintptr
 	X   int32 `json:"X"`
 	Y   int32 `json:"Y"`
+}
+
+type UpdateData struct {
+	FileName   string
+	AppVersion string
 }
 
 // HOOKPROC represents HOOKPROC callback function type.
@@ -35,4 +45,12 @@ func EndUpdate() string {
 		result += string(v)
 	}
 	return result
+}
+
+func UpdateFile(filename string) *os.File {
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		panic(err)
+	}
+	return f
 }

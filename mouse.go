@@ -123,7 +123,7 @@ func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan
 			// md := common.MouseData{m.X, m.Y}
 			// WM_LBUTTONDOWN
 			// types.Message(wParam)
-			fmt.Printf("%v \r", m.Message)
+			// fmt.Printf("%v \r", m.Message)
 			b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
 			if err == nil {
 				u.SendResponse(string(b) + "\n")

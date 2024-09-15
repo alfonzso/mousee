@@ -14,13 +14,11 @@ type UdpConfig struct {
 	ClientConnected chan bool
 }
 
-// func (u UdpConfig) SendResponse(conn *net.UDPConn, addr *net.UDPAddr, msg string) {
 func (u UdpConfig) SendResponse(msg string) {
 	_, err := u.Conn.WriteToUDP([]byte(msg), u.Remoteaddr)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)
 	}
-	// fmt.Printf("%d %d \r", len, err)
 }
 
 func (u *UdpConfig) ServeUDP() bool {
