@@ -29,7 +29,7 @@ kill:
 build:
 	SHA=$$(powershell.exe -c 'git rev-parse --short HEAD') ; \
 	MMDDHHMM=$$(powershell.exe -c 'Get-Date -Format MMdd.hhmm') ; \
-	go build -o $(BINARY_NAME) -ldflags "-X common.AppVersion=v$$SHA.$$MMDDHHMM -X common.AppName=$(BINARY_NAME)" .
+	go build -o $(BINARY_NAME) -ldflags "-X 'github.com/alfonzso/mousee/common.AppVersion=v$$SHA.$$MMDDHHMM' -X 'github.com/alfonzso/mousee/common.AppName=$(BINARY_NAME)'" .
 
 # Run the Go binary
 run:

@@ -1,6 +1,8 @@
 package common
 
-import "os"
+import (
+	"os"
+)
 
 var AppVersion string
 var AppName string
@@ -12,8 +14,9 @@ type MouseData struct {
 }
 
 type UpdateData struct {
-	FileName   string
+	AppName    string
 	AppVersion string
+	AppCrc32   uint32
 }
 
 // HOOKPROC represents HOOKPROC callback function type.

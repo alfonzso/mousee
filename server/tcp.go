@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"hash/crc32"
 	"net"
 	"os"
 	"strings"
 
 	"github.com/alfonzso/mousee/common"
+	// "../common"
 	// "os"
 	// "github.com/alfonzso/mousee/common"
 )
@@ -73,17 +75,25 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		fmt.Printf("Received: %s", message)
+		fmt.Printf("Received: %s \n", message)
 
 		if message == "UPDATE" {
 			message = ""
 			conn.Write([]byte(common.BeginUpdate()))
-			b, err := json.Marshal(common.UpdateData{FileName: common.AppName, AppVersion: common.AppVersion})
+			dat, err := os.ReadFile(common.AppName)
+			common.Check(err)
+
+			crc32q := crc32.MakeTable(0xD5828281)
+			b, err := json.Marshal(
+				common.UpdateData{
+					AppName:    common.AppName,
+					AppVersion: common.AppVersion,
+					AppCrc32:   crc32.Checksum(dat, crc32q),
+				},
+			)
 			if err == nil {
 				conn.Write(b)
 			}
-			dat, err := os.ReadFile("mousee.exe")
-			common.Check(err)
 			conn.Write(dat)
 			conn.Write([]byte(common.EndUpdate()))
 		}
