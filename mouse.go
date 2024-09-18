@@ -57,10 +57,10 @@ func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 			// Intercept left and right mouse button down events
 			if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
 				log.Println("Mouse click blocked!")
-				c <- types.MouseEvent{
-					Message:        types.Message(wParam),
-					MSLLHOOKSTRUCT: *(*types.MSLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
-				}
+				// c <- types.MouseEvent{
+				// 	Message:        types.Message(wParam),
+				// 	MSLLHOOKSTRUCT: *(*types.MSLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
+				// }
 				// return 1 // Block the event
 				cont = false
 			}

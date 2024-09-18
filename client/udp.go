@@ -41,14 +41,17 @@ func ClientMode() {
 		if err := json.Unmarshal(p[:readLen], &mouseData); err != nil {
 			panic(err)
 		}
-		// fmt.Println("mouseData", mouseData)
+
+		fmt.Println("mouseData", string(p[:readLen]))
 		robotgo.Move(int(mouseData.X), int(mouseData.Y))
 
 		if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
+			// fmt.Println(">>> left")
 			robotgo.Click("left")
 		}
 
 		if uintptr(common.WM_RBUTTONDOWN) == mouseData.Msg {
+			// fmt.Println(">>> right")
 			robotgo.Click("right")
 		}
 

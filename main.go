@@ -1,46 +1,12 @@
-// //go:build windows
-
-// package main
-
-// import (
-//     "fmt"
-//     "syscall"
-//     "unsafe"
-// )
-
-// func main() {
-//     userDll := syscall.NewLazyDLL("user32.dll")
-//     getWindowRectProc := userDll.NewProc("GetCursorPos")
-//     type POINT struct {
-//         X, Y int32
-//     }
-//     var pt POINT
-//     _, _, eno := syscall.SyscallN(getWindowRectProc.Addr(), uintptr(unsafe.Pointer(&pt)))
-//     if eno != 0 {
-//         fmt.Println(eno)
-//     }
-//     fmt.Printf("[cursor.Pos] X:%d Y:%d\n", pt.X, pt.Y)
-// }
-//go:build windows
-// +build windows
-
 package main
 
 import (
-	// "fmt"
 	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-	"time"
-
-	// "time"
-
-	// "os"
-	// "os/signal"
-	// "time"
 
 	"github.com/alfonzso/mousee/client"
 	"github.com/alfonzso/mousee/common"
@@ -71,10 +37,7 @@ func Flags() (bool, bool) {
 var infoLogger = log.New(os.Stdout, "INFO: ", 0)
 
 func main() {
-	_, update := Flags()
-	// log.SetFlags(0)
-	// log.SetPrefix("error: ")
-	// infoLogger.Println("Client mode active ...")
+	cli, update := Flags()
 
 	if update {
 		client.UpdateMode()
@@ -83,21 +46,17 @@ func main() {
 		go server.StartUpdateServer()
 	}
 
-	for {
-		// serve forever
-		time.Sleep(100 * time.Millisecond)
-		// select {
-		// case
-		// }
-	}
-
-	// if cli {
-	// 	client.ClientMode()
-	// } else {
-	// 	if err := serverMode(); err != nil {
-	// 		log.Fatal(err)
-	// 	}
+	// for {
+	// 	time.Sleep(100 * time.Millisecond)
 	// }
+
+	if cli {
+		client.ClientMode()
+	} else {
+		if err := serverMode(); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func serverMode() error {
@@ -123,14 +82,9 @@ func serverMode() error {
 	u.StartServer()
 
 	for {
-		// serve forever
-		// time.Sleep(100 * time.Millisecond)
-		// select {
-		// case
 		<-signalChan
 		fmt.Println("Received shutdown signal")
 		return nil
-		// }
 	}
 
 	return nil
