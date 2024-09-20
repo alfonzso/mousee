@@ -13,6 +13,8 @@ import (
 	"github.com/alfonzso/mousee/server"
 	"github.com/moutend/go-hook/pkg/mouse"
 	"github.com/moutend/go-hook/pkg/types"
+
+	"github.com/gorilla/websocket"
 )
 
 type HookHandler func(c chan<- types.MouseEvent) types.HOOKPROC
@@ -90,12 +92,13 @@ func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 	}
 }
 
-func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
+// func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
+func MousePosHook(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
 
 	// signalChan := make(chan os.Signal, 1)
 	// signal.Notify(signalChan, os.Interrupt)
 
-	res := u.IsClientConnected(signalChan)
+	res := ws.IsClientConnected(signalChan)
 	if !res {
 		os.Exit(0)
 	}
@@ -126,7 +129,10 @@ func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan
 			// fmt.Printf("%v \r", m.Message)
 			b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
 			if err == nil {
-				u.SendResponse(string(b) + "\n")
+				// ws.SendResponse(string(b) + "\n")
+				for conn := range ws.Clients {
+					conn.WriteMessage(websocket.TextMessage, b)
+				}
 			}
 			continue
 		}

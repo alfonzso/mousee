@@ -4,14 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net"
 	"os"
 	"os/signal"
+
+	// "os/signal"
 
 	"github.com/alfonzso/mousee/client"
 	"github.com/alfonzso/mousee/common"
 	"github.com/alfonzso/mousee/server"
 	"github.com/moutend/go-hook/pkg/types"
+	// "github.com/moutend/go-hook/pkg/types"
 )
 
 func Flags() (bool, bool) {
@@ -37,21 +39,22 @@ func Flags() (bool, bool) {
 var infoLogger = log.New(os.Stdout, "INFO: ", 0)
 
 func main() {
-	cli, update := Flags()
+	cli, _ := Flags()
+	// cli, update := Flags()
 
-	if update {
-		client.UpdateMode()
-		os.Exit(0)
-	} else {
-		go server.StartUpdateServer()
-	}
+	// if update {
+	// 	client.UpdateMode()
+	// 	os.Exit(0)
+	// } else if !cli {
+	// 	go server.StartUpdateServer()
+	// }
 
 	// for {
 	// 	time.Sleep(100 * time.Millisecond)
 	// }
 
 	if cli {
-		client.ClientMode()
+		client.WsClientMode()
 	} else {
 		if err := serverMode(); err != nil {
 			log.Fatal(err)
@@ -67,19 +70,27 @@ func serverMode() error {
 
 	infoLogger.Println("Server mode active ...")
 
-	u := server.UdpConfig{
-		Addr: &net.UDPAddr{
-			Port: 1234,
-			IP:   net.ParseIP("192.168.1.100"),
-		},
-		ClientConnected: make(chan bool),
-	}
+	server := server.ServeWS()
+	// server.ServeWS()
+
+	// u := server.UdpConfig{
+	// 	Addr: &net.UDPAddr{
+	// 		Port: 1234,
+	// 		IP:   net.ParseIP("192.168.1.100"),
+	// 	},
+	// 	ClientConnected: make(chan bool),
+	// }
+
+	// for {
+	// 	time.Sleep(100 * time.Millisecond)
+	// }
 
 	go Mouse(nil, mouseChan)
 
-	go MousePosHook(&u, signalChan, mouseChan)
+	// // go MousePosHook(&u, signalChan, mouseChan)
+	go MousePosHook(server, signalChan, mouseChan)
 
-	u.StartServer()
+	// // server.StartServer()
 
 	for {
 		<-signalChan
