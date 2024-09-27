@@ -1,17 +1,55 @@
 package client
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/alfonzso/mousee/common"
+	"github.com/go-vgo/robotgo"
 	"github.com/gorilla/websocket"
 )
 
 // var addr = flag.String("addr", "127.0.0.1:12345", "http service address")
+
+var mouseData common.MouseData
+
+func decodeMouseData(message []byte) {
+	if err := json.Unmarshal(message, &mouseData); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("mouseData", string(message))
+	robotgo.Move(int(mouseData.X), int(mouseData.Y))
+
+	if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
+		// fmt.Println(">>> left")
+		robotgo.Toggle("left")
+		// robotgo.Click("left")
+	}
+
+	if uintptr(common.WM_LBUTTONUP) == mouseData.Msg {
+		// fmt.Println(">>> left")
+		robotgo.Toggle("left", "up")
+		// robotgo.Click("left")
+	}
+
+	if uintptr(common.WM_RBUTTONDOWN) == mouseData.Msg {
+		// fmt.Println(">>> right")
+		// robotgo.Click("right")
+		robotgo.Toggle("right")
+	}
+	if uintptr(common.WM_RBUTTONUP) == mouseData.Msg {
+		// fmt.Println(">>> right")
+		// robotgo.Click("right")
+		robotgo.Toggle("right", "up")
+	}
+}
 
 func WsClientMode() {
 	infoLogger := log.New(os.Stdout, "INFO: ", 0)
@@ -45,7 +83,8 @@ func WsClientMode() {
 				log.Println("read:", err)
 				return
 			}
-			log.Printf("recv: %s", message)
+			decodeMouseData(message)
+			// log.Printf("recv: %s", message)
 		}
 	}()
 

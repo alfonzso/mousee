@@ -1,55 +1,107 @@
 package server
 
-// import (
-//     "github.com/gorilla/websocket"
-//     "net/http"
-// )
+import (
+	"flag"
+	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"time"
 
-// var upgrader = websocket.Upgrader{
-//     CheckOrigin: func(r *http.Request) bool {
-//         return true // Accepting all requests
-//     },
+	"github.com/gorilla/websocket"
+)
+
+type WsConfig struct {
+	Addr            *net.UDPAddr
+	Conn            *net.UDPConn
+	Remoteaddr      *net.UDPAddr
+	ClientConnected chan bool
+}
+
+//	var Upgrader = websocket.Upgrader{
+//		CheckOrigin: func(r *http.Request) bool {
+//			return true // Accepting all requests
+//		},
+//	}
+var Upgrader = websocket.Upgrader{} // use default options
+
+type WSServer struct {
+	Clients map[*websocket.Conn]bool
+	// handleMessage   func(message []byte) // New message handler
+	ClientConnected chan bool
+}
+
+// func (ws *WsConfig) ServeWS(handleMessage func(message []byte)) *Server {
+var flagAddr = flag.String("wsAddr", "localhost:5555", "http service address")
+
+// func home(w http.ResponseWriter, r *http.Request) {
+// 	// homeTemplate.Execute(w, "ws://"+r.Host+"/echo")
+// 	w.Write([]byte("Here is a string...."))
 // }
 
-// type Server struct {
-//     clients       map[*websocket.Conn]bool
-//     handleMessage func(message []byte) // New message handler
-// }
+type REQ func(http.ResponseWriter, *http.Request)
 
-// func StartServer(handleMessage func(message []byte)) *Server {
-//     server := Server{
-//         make(map[*websocket.Conn]bool),
-//         handleMessage,
-//     }
+func ServeWS() *WSServer {
+	flag.Parse()
+	server := WSServer{
+		make(map[*websocket.Conn]bool),
+		make(chan bool),
+	}
 
-//     http.HandleFunc("/", server.echo)
-//     go http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/client", server.Client())
+	go func() {
+		fmt.Println(">> WSServer listening at", *flagAddr)
+		errr := http.ListenAndServe(*flagAddr, nil)
+		fmt.Println(">> ", errr)
+	}()
 
-//     return &server
-// }
+	// server.IsClientConnected(nil)
 
-// func (server *Server) echo(w http.ResponseWriter, r *http.Request) {
-//     connection, _ := upgrader.Upgrade(w, r, nil)
+	return &server
+}
 
-//     server.clients[connection] = true // Save the connection using it as a key
+// The function will block the runtime until someone connects to us.
+// func (u WsConfig) IsClientConnected(signalChan chan os.Signal) bool {
+func (serv *WSServer) IsClientConnected(signalChan chan os.Signal) bool {
+	fmt.Println(">> IsClientConnected")
+	for {
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case connected := <-serv.ClientConnected:
+			if connected {
+				fmt.Println(">> ClientConnected")
+				return true
+			}
 
-//     for {
-//         mt, message, err := connection.ReadMessage()
+		case <-signalChan:
+			fmt.Println(">> App shutting down")
+			return false
+		}
+	}
+}
 
-//         if err != nil || mt == websocket.CloseMessage {
-//             break // Exit the loop if the client tries to close the connection or the connection is interrupted
-//         }
+// func (serv *WSServer) Client(w http.ResponseWriter, r *http.Request) {
+func (serv *WSServer) Client() REQ {
+	return func(w http.ResponseWriter, r *http.Request) {
+		serv.ClientConnected <- false
+		connection, _ := Upgrader.Upgrade(w, r, nil)
 
-//         go server.handleMessage(message)
-//     }
+		serv.Clients[connection] = true
 
-//     delete(server.clients, connection) // Removing the connection
+		mt, message, err := connection.ReadMessage()
 
-//     connection.Close()
-// }
+		if err != nil {
+			fmt.Printf("Some error  %v", err)
+			panic(err)
+		}
 
-// func (server *Server) WriteMessage(message []byte) {
-//     for conn := range server.clients {
-//         conn.WriteMessage(websocket.TextMessage, message)
-//     }
-// }
+		// fmt.Printf("Read a message from %s \n", message[:mt])
+		fmt.Printf("Read a message from %s %d\n", message, mt)
+
+		// serv.Remoteaddr = remoteaddr
+
+		fmt.Println("Starting ...", connection.RemoteAddr())
+		serv.ClientConnected <- true
+
+	}
+}
