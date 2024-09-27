@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -65,7 +64,7 @@ func ServeWS() *WSServer {
 func (serv *WSServer) IsClientConnected(signalChan chan os.Signal) bool {
 	fmt.Println(">> IsClientConnected")
 	for {
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(100 * time.Millisecond)
 		select {
 		case connected := <-serv.ClientConnected:
 			if connected {

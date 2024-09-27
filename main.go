@@ -12,8 +12,12 @@ import (
 	"github.com/alfonzso/mousee/client"
 	"github.com/alfonzso/mousee/common"
 	"github.com/alfonzso/mousee/server"
+
+	// "github.com/alfonzso/mousee/server"
 	"github.com/moutend/go-hook/pkg/types"
+
 	// "github.com/moutend/go-hook/pkg/types"
+	"github.com/moutend/go-hook/pkg/mouse"
 )
 
 func Flags() (bool, bool) {
@@ -85,7 +89,14 @@ func serverMode() error {
 	// 	time.Sleep(100 * time.Millisecond)
 	// }
 
-	go Mouse(nil, mouseChan)
+	// go Mouse(nil, mouseChan)
+
+	// if err := mouse.Install(mouse.DefaultHookHandler, mouseChan); err != nil {
+	if err := mouse.Install(DefaultHookHandler, mouseChan); err != nil {
+		return err
+	}
+
+	defer mouse.Uninstall()
 
 	// // go MousePosHook(&u, signalChan, mouseChan)
 	go MousePosHook(server, signalChan, mouseChan)
@@ -93,10 +104,27 @@ func serverMode() error {
 	// // server.StartServer()
 
 	for {
+		// select {
+		// case <-time.After(5 * time.Minute):
+		// 	fmt.Println("Received timeout signal")
+		// 	return nil
+		// case m := <-mouseChan:
+		// 	fmt.Println("Received mmm", m)
+		// 	continue
+		// case <-signalChan:
+		// 	fmt.Println("Received shutdown signal")
+		// 	return nil
+		// case
 		<-signalChan
 		fmt.Println("Received shutdown signal")
 		return nil
+		// }
 	}
+
+	// reader := bufio.NewReader(os.Stdin)
+	// fmt.Print("Enter text: ")
+	// text, _ := reader.ReadString('\n')
+	// fmt.Println(text)
 
 	return nil
 }
