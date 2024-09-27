@@ -32,7 +32,7 @@ type WSServer struct {
 }
 
 // func (ws *WsConfig) ServeWS(handleMessage func(message []byte)) *Server {
-var flagAddr = flag.String("wsAddr", "localhost:5555", "http service address")
+var flagAddr = flag.String("wsAddr", "192.168.1.100:5555", "http service address")
 
 // func home(w http.ResponseWriter, r *http.Request) {
 // 	// homeTemplate.Execute(w, "ws://"+r.Host+"/echo")

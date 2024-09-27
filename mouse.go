@@ -80,7 +80,7 @@ func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				}
 				// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 			}
-			log.Println(">>>>>>>>>>>", wParam)
+			// log.Println(">>>>>>>>>>>", wParam)
 		}
 
 		if !cont {
