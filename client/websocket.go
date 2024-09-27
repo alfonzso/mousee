@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -24,7 +23,7 @@ func decodeMouseData(message []byte) {
 		panic(err)
 	}
 
-	fmt.Println("mouseData", string(message))
+	// fmt.Println("mouseData", string(message))
 	robotgo.Move(int(mouseData.X), int(mouseData.Y))
 
 	if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
@@ -56,7 +55,7 @@ func WsClientMode() {
 
 	infoLogger.Println("Client mode active ...")
 
-	addr := flag.String("cliAddr", "localhost:5555", "http service address")
+	addr := flag.String("cliAddr", "192.168.1.100:5555", "http service address")
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
