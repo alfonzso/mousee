@@ -2,19 +2,26 @@ package common
 
 import (
 	"os"
+
+	"github.com/moutend/go-hook/pkg/types"
 )
 
 var AppVersion string
 var AppName string
 
-type MouseData struct {
-	Msg uintptr
-	X   int32 `json:"X"`
-	Y   int32 `json:"Y"`
+type CommonData struct {
+	Msg    uintptr
+	X      int32 `json:"X"`
+	Y      int32 `json:"Y"`
+	VKCode types.VKCode
 }
-type KeyBoardData struct {
-	Msg uintptr
-}
+
+type MouseData CommonData
+type KeyBoardData CommonData
+
+// type KeyBoardData struct {
+// 	CommonData
+// }
 
 type UpdateData struct {
 	AppName    string

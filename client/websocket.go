@@ -12,40 +12,43 @@ import (
 	"github.com/alfonzso/mousee/common"
 	"github.com/go-vgo/robotgo"
 	"github.com/gorilla/websocket"
+	"github.com/moutend/go-hook/pkg/types"
 )
 
 // var addr = flag.String("addr", "127.0.0.1:12345", "http service address")
 
-var mouseData common.MouseData
+var commonData common.CommonData
 
 func decodeMouseData(message []byte) {
-	if err := json.Unmarshal(message, &mouseData); err != nil {
+	if err := json.Unmarshal(message, &commonData); err != nil {
 		panic(err)
 	}
 
-	// fmt.Println("mouseData", string(message))
-	robotgo.Move(int(mouseData.X), int(mouseData.Y))
-	
-	if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
-		// fmt.Println(">>> left")
+	if commonData.VKCode != 0 {
+		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
+			robotgo.KeyToggle(commonData.VKCode.String())
+		} else {
+			robotgo.KeyToggle(commonData.VKCode.String(), "up")
+		}
+		return
+	}
+
+	if commonData.X != -1 && commonData.Y != -1 {
+		robotgo.Move(int(commonData.X), int(commonData.Y))
+	}
+
+	if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
 		robotgo.Toggle("left")
-		// robotgo.Click("left")
 	}
 
-	if uintptr(common.WM_LBUTTONUP) == mouseData.Msg {
-		// fmt.Println(">>> left")
+	if uintptr(common.WM_LBUTTONUP) == commonData.Msg {
 		robotgo.Toggle("left", "up")
-		// robotgo.Click("left")
 	}
 
-	if uintptr(common.WM_RBUTTONDOWN) == mouseData.Msg {
-		// fmt.Println(">>> right")
-		// robotgo.Click("right")
+	if uintptr(common.WM_RBUTTONDOWN) == commonData.Msg {
 		robotgo.Toggle("right")
 	}
-	if uintptr(common.WM_RBUTTONUP) == mouseData.Msg {
-		// fmt.Println(">>> right")
-		// robotgo.Click("right")
+	if uintptr(common.WM_RBUTTONUP) == commonData.Msg {
 		robotgo.Toggle("right", "up")
 	}
 }

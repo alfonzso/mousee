@@ -128,10 +128,13 @@ func SendDataToClient(ws *server.WSServer, signalChan chan os.Signal, mouseChan 
 		case isClientCOnnected = <-ws.ClientConnected:
 			continue
 		case k := <-keyboardChan:
-			fmt.Printf(">>k>> %v \r", k)
+			fmt.Printf(">>k>> %+v \r", k)
 			if isClientCOnnected {
 				// b, err := json.Marshal(common.MouseData{X: k.X, Y: m.Y, Msg: uintptr(m.Message)})
-				b, err := json.Marshal(common.KeyBoardData{Msg: uintptr(k.Message)})
+				f := common.KeyBoardData{VKCode: k.VKCode, X: -1, Y: -1, Msg: uintptr(k.Message)}
+				// f.X
+				// b, err := json.Marshal(common.KeyBoardData{X: 0, Y: 0, Msg: uintptr(k.Message), VKCode: k.VKCode})
+				b, err := json.Marshal(f)
 				if err == nil {
 					// ws.SendResponse(string(b) + "\n")
 					for conn := range ws.Clients {
@@ -149,7 +152,7 @@ func SendDataToClient(ws *server.WSServer, signalChan chan os.Signal, mouseChan 
 			// fmt.Printf("%v \r", string(b))
 			// if false {
 			if isClientCOnnected {
-				b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
+				b, err := json.Marshal(common.MouseData{VKCode: 0, X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
 				if err == nil {
 					// ws.SendResponse(string(b) + "\n")
 					for conn := range ws.Clients {
