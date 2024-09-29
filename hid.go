@@ -51,16 +51,20 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 				KBDLLHOOKSTRUCT: *(*types.KBDLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
 			}
 			// if keyBevt.VKCode.String() == "enter" {
-			log.Println(keyBevt)
+			// log.Println(keyBevt)
 			if keyBevt.VKCode == types.VK_ESCAPE {
 				keyboardDebugMode += 1
 			}
 			c <- keyBevt
 		}
+		if keyboardDebugMode < 5 {
+			return 1
+		}
+		if keyboardDebugMode == 6 {
+			log.Println("Keyboard enabled...")
+		}
 		if keyboardDebugMode > 10 {
 			keyboardDebugMode = 0
-		}
-		if keyboardDebugMode > 5 {
 			return 1
 		}
 		return win32.CallNextHookEx(0, code, wParam, lParam)
