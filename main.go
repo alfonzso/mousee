@@ -99,7 +99,7 @@ func serverMode() error {
 		return err
 	}
 
-	if err := keyboard.Install(nil, keyboardChan); err != nil {
+	if err := keyboard.Install(KeyboardDefaultHookHandler, keyboardChan); err != nil {
 		return err
 	}
 
@@ -107,7 +107,7 @@ func serverMode() error {
 	defer keyboard.Uninstall()
 
 	// // go MousePosHook(&u, signalChan, mouseChan)
-	go SendDataToClient(server, signalChan, mouseChan, keyboardChan)
+	go server.SendDataToClient(signalChan, mouseChan, keyboardChan)
 
 	// // server.StartServer()
 

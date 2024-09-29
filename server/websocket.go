@@ -1,13 +1,17 @@
 package server
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alfonzso/mousee/common"
 	"github.com/gorilla/websocket"
+	"github.com/moutend/go-hook/pkg/types"
 )
 
 type WsConfig struct {
@@ -102,5 +106,59 @@ func (serv *WSServer) Client() REQ {
 		fmt.Println("Starting ...", connection.RemoteAddr())
 		serv.ClientConnected <- true
 
+	}
+}
+
+func (ws *WSServer) SendDataToClient(signalChan chan os.Signal, mouseChan chan types.MouseEvent, keyboardChan chan types.KeyboardEvent) error {
+
+	fmt.Println("start capturing mouse input")
+
+	var isClientCOnnected bool
+	for {
+		// time.Sleep(100 * time.Millisecond)
+		select {
+		case <-time.After(5 * time.Minute):
+			fmt.Println("Received timeout signal")
+			return nil
+		case <-signalChan:
+			fmt.Println("Received shutdown signal")
+			return nil
+		case isClientCOnnected = <-ws.ClientConnected:
+			continue
+		case k := <-keyboardChan:
+			fmt.Printf(">>k>> %+v \r", k)
+			if isClientCOnnected {
+				// b, err := json.Marshal(common.MouseData{X: k.X, Y: m.Y, Msg: uintptr(m.Message)})
+				f := common.KeyBoardData{VKCode: k.VKCode, X: -1, Y: -1, Msg: uintptr(k.Message)}
+				// f.X
+				// b, err := json.Marshal(common.KeyBoardData{X: 0, Y: 0, Msg: uintptr(k.Message), VKCode: k.VKCode})
+				b, err := json.Marshal(f)
+				if err == nil {
+					// ws.SendResponse(string(b) + "\n")
+					for conn := range ws.Clients {
+						conn.WriteMessage(websocket.TextMessage, b)
+					}
+				}
+			}
+			continue
+		case m := <-mouseChan:
+			// msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
+			// msg := fmt.Sprintf("%v %v", m.X, m.Y)
+			// md := common.MouseData{m.X, m.Y}
+			// WM_LBUTTONDOWN
+			// types.Message(wParam)
+			// fmt.Printf("%v \r", string(b))
+			// if false {
+			if isClientCOnnected {
+				b, err := json.Marshal(common.MouseData{VKCode: 0, X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
+				if err == nil {
+					// ws.SendResponse(string(b) + "\n")
+					for conn := range ws.Clients {
+						conn.WriteMessage(websocket.TextMessage, b)
+					}
+				}
+			}
+			continue
+		}
 	}
 }
