@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -24,7 +25,11 @@ func decodeMouseData(message []byte) {
 		panic(err)
 	}
 
+	// fmt.Printf("%+v   %d %d            \r", commonData, types.WM_KEYDOWN, commonData.Msg)
+
 	if commonData.VKCode != 0 {
+		fmt.Println(types.WM_KEYDOWN == types.Message(commonData.Msg))
+		fmt.Println(commonData.VKCode.String())
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(commonData.VKCode.String())
 		} else {
