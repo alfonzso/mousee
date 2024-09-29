@@ -20,6 +20,35 @@ import (
 
 var commonData common.CommonData
 
+var remapAtoZKeys = map[types.VKCode]rune{
+	types.VK_A: 'a',
+	types.VK_B: 'b',
+	types.VK_C: 'c',
+	types.VK_D: 'd',
+	types.VK_E: 'e',
+	types.VK_F: 'f',
+	types.VK_G: 'g',
+	types.VK_H: 'h',
+	types.VK_I: 'i',
+	types.VK_J: 'j',
+	types.VK_K: 'k',
+	types.VK_L: 'l',
+	types.VK_M: 'm',
+	types.VK_N: 'n',
+	types.VK_O: 'o',
+	types.VK_P: 'p',
+	types.VK_Q: 'q',
+	types.VK_R: 'r',
+	types.VK_S: 's',
+	types.VK_T: 't',
+	types.VK_U: 'u',
+	types.VK_V: 'v',
+	types.VK_W: 'w',
+	types.VK_X: 'x',
+	types.VK_Y: 'y',
+	types.VK_Z: 'z',
+}
+
 func decodeMouseData(message []byte) {
 	if err := json.Unmarshal(message, &commonData); err != nil {
 		panic(err)
@@ -30,10 +59,14 @@ func decodeMouseData(message []byte) {
 	if commonData.VKCode != 0 {
 		fmt.Println(types.WM_KEYDOWN == types.Message(commonData.Msg))
 		fmt.Println(commonData.VKCode.String())
+		char, ok := remapAtoZKeys[commonData.VKCode]
+		if ! ok {
+			char = rune(commonData.VKCode)
+		}
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
-			robotgo.KeyToggle(commonData.VKCode.String())
+			robotgo.KeyToggle(string(char))
 		} else {
-			robotgo.KeyToggle(commonData.VKCode.String(), "up")
+			robotgo.KeyToggle(string(char), "up")
 		}
 		return
 	}
