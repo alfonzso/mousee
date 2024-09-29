@@ -54,7 +54,7 @@ type MouseLLHookStruct struct {
 
 var mouseDebugMode = 0
 
-func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
+func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 	return func(code int32, wParam, lParam uintptr) uintptr {
 		cont := true
 		if lParam != 0 {
@@ -97,8 +97,8 @@ func DefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 	}
 }
 
-// func MousePosHook(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
-func MousePosHook(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
+// func SendDataToClient(u *server.UdpConfig, signalChan chan os.Signal, mouseChan chan types.MouseEvent) error {
+func SendDataToClient(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan types.MouseEvent, keyboardChan chan types.KeyboardEvent) error {
 
 	// signalChan := make(chan os.Signal, 1)
 	// signal.Notify(signalChan, os.Interrupt)
@@ -115,7 +115,7 @@ func MousePosHook(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan
 	// }
 
 	// defer mouse.Uninstall()
-	var isCon bool
+	var isClientCOnnected bool
 	for {
 		// time.Sleep(100 * time.Millisecond)
 		select {
@@ -125,7 +125,20 @@ func MousePosHook(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan
 		case <-signalChan:
 			fmt.Println("Received shutdown signal")
 			return nil
-		case isCon = <-ws.ClientConnected:
+		case isClientCOnnected = <-ws.ClientConnected:
+			continue
+		case k := <-keyboardChan:
+			fmt.Printf(">>k>> %v \r", k)
+			if isClientCOnnected {
+				// b, err := json.Marshal(common.MouseData{X: k.X, Y: m.Y, Msg: uintptr(m.Message)})
+				b, err := json.Marshal(common.KeyBoardData{Msg: uintptr(k.Message)})
+				if err == nil {
+					// ws.SendResponse(string(b) + "\n")
+					for conn := range ws.Clients {
+						conn.WriteMessage(websocket.TextMessage, b)
+					}
+				}
+			}
 			continue
 		case m := <-mouseChan:
 			// msg := fmt.Sprintf("Received %v {X:%v, Y:%v}\n", m.Message, m.X, m.Y)
@@ -135,7 +148,7 @@ func MousePosHook(ws *server.WSServer, signalChan chan os.Signal, mouseChan chan
 			// types.Message(wParam)
 			// fmt.Printf("%v \r", string(b))
 			// if false {
-			if isCon {
+			if isClientCOnnected {
 				b, err := json.Marshal(common.MouseData{X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
 				if err == nil {
 					// ws.SendResponse(string(b) + "\n")

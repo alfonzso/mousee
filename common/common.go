@@ -12,6 +12,9 @@ type MouseData struct {
 	X   int32 `json:"X"`
 	Y   int32 `json:"Y"`
 }
+type KeyBoardData struct {
+	Msg uintptr
+}
 
 type UpdateData struct {
 	AppName    string

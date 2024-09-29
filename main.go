@@ -17,6 +17,7 @@ import (
 	"github.com/moutend/go-hook/pkg/types"
 
 	// "github.com/moutend/go-hook/pkg/types"
+	"github.com/moutend/go-hook/pkg/keyboard"
 	"github.com/moutend/go-hook/pkg/mouse"
 )
 
@@ -68,7 +69,9 @@ func main() {
 
 func serverMode() error {
 
+	keyboardChan := make(chan types.KeyboardEvent, 100)
 	mouseChan := make(chan types.MouseEvent, 100)
+
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 
@@ -92,14 +95,19 @@ func serverMode() error {
 	// go Mouse(nil, mouseChan)
 
 	// if err := mouse.Install(mouse.DefaultHookHandler, mouseChan); err != nil {
-	if err := mouse.Install(DefaultHookHandler, mouseChan); err != nil {
+	if err := mouse.Install(MouseDefaultHookHandler, mouseChan); err != nil {
+		return err
+	}
+
+	if err := keyboard.Install(nil, keyboardChan); err != nil {
 		return err
 	}
 
 	defer mouse.Uninstall()
+	defer keyboard.Uninstall()
 
 	// // go MousePosHook(&u, signalChan, mouseChan)
-	go MousePosHook(server, signalChan, mouseChan)
+	go SendDataToClient(server, signalChan, mouseChan, keyboardChan)
 
 	// // server.StartServer()
 

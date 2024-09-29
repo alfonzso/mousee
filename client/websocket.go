@@ -25,7 +25,7 @@ func decodeMouseData(message []byte) {
 
 	// fmt.Println("mouseData", string(message))
 	robotgo.Move(int(mouseData.X), int(mouseData.Y))
-
+	
 	if uintptr(common.WM_LBUTTONDOWN) == mouseData.Msg {
 		// fmt.Println(">>> left")
 		robotgo.Toggle("left")
