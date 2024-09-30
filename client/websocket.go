@@ -95,21 +95,17 @@ func decodeMouseData(message []byte) {
 	// fmt.Printf("%+v   %d %d            \r", commonData, types.WM_KEYDOWN, commonData.Msg)
 
 	if commonData.VKCode != 0 {
-
-		// fmt.Println(types.WM_KEYDOWN == types.Message(commonData.Msg))
 		key, ok := remapAtoZKeys[commonData.VKCode]
 		if !ok {
-			fmt.Println(string(key))
 			key = string(rune(uint32(commonData.VKCode)))
 		}
-		// fmt.Println(string(str))
-		// robotgo.KeyDown("shift")
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(key)
+			fmt.Printf(">d> %s", key)
 		} else {
 			robotgo.KeyToggle(key, "up")
+			fmt.Printf(">u> %s", key)
 		}
-		// robotgo.KeyUp("shift")
 		return
 	}
 
