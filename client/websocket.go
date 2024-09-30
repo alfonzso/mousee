@@ -72,7 +72,7 @@ var remapAtoZKeys = map[types.VKCode]string{
 
 	types.VK_OEM_COMMA:  ",",
 	types.VK_OEM_MINUS:  "-",
-	types.VK_OEM_PLUS:   "+",
+	types.VK_OEM_PLUS:   "=",
 	types.VK_OEM_PERIOD: ".",
 
 	types.VK_OEM_1: ";",  //     For the US standard keyboard, the ';:' key
