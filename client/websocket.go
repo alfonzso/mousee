@@ -53,10 +53,10 @@ var remapAtoZKeys = map[types.VKCode]string{
 	types.VK_RETURN:   "enter",
 	types.VK_CONTROL:  "ctrl",
 	types.VK_LCONTROL: "lctrl",
-	types.VK_RCONTROL: "rcontrol",
+	types.VK_RCONTROL: "rctrl",
 	types.VK_MENU:     "alt",
-	types.VK_LMENU:    "alt",
-	types.VK_RMENU:    "alt",
+	types.VK_LMENU:    "lalt",
+	types.VK_RMENU:    "ralt",
 	types.VK_TAB:      "tab",
 	types.VK_CAPITAL:  "capslock",
 	types.VK_SPACE:    "space",
@@ -99,7 +99,7 @@ func decodeMouseData(message []byte) {
 		if !ok {
 			key = string(rune(uint32(commonData.VKCode)))
 		}
-		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
+		if types.WM_KEYDOWN == types.Message(commonData.Msg) || types.WM_SYSKEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(key)
 			fmt.Printf(">d> %s", key)
 		} else {
