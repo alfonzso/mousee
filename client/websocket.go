@@ -99,7 +99,7 @@ func decodeMouseData(message []byte) {
 		if !ok {
 			key = string(rune(uint32(commonData.VKCode)))
 		}
-		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
+		if types.WM_KEYDOWN == types.Message(commonData.Msg) || types.WM_SYSKEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(key)
 			fmt.Printf(">d> %s\n", key)
 		} else {
