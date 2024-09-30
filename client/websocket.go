@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
+	// "fmt"
 	"log"
 	"net/url"
 	"os"
