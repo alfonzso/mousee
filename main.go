@@ -11,6 +11,7 @@ import (
 
 	"github.com/alfonzso/mousee/client"
 	"github.com/alfonzso/mousee/common"
+	"github.com/alfonzso/mousee/hid"
 	"github.com/alfonzso/mousee/server"
 
 	// "github.com/alfonzso/mousee/server"
@@ -95,11 +96,11 @@ func serverMode() error {
 	// go Mouse(nil, mouseChan)
 
 	// if err := mouse.Install(mouse.DefaultHookHandler, mouseChan); err != nil {
-	if err := mouse.Install(MouseDefaultHookHandler, mouseChan); err != nil {
+	if err := mouse.Install(hid.MouseDefaultHookHandler, mouseChan); err != nil {
 		return err
 	}
 
-	if err := keyboard.Install(KeyboardDefaultHookHandler, keyboardChan); err != nil {
+	if err := keyboard.Install(hid.KeyboardDefaultHookHandler, keyboardChan); err != nil {
 		return err
 	}
 

@@ -8,6 +8,16 @@
       {
           "before": ["<C-r>"],
           "commands": ["redo"]
+      },
+      {
+        "before": ["c", "n"],
+        "commands": ["editor.action.marker.next"],
+        "silent": true
+      },
+      {
+          "before": ["c", "p"],
+          "commands": ["editor.action.marker.prev"],
+          "silent": true
       }
   ]
 }

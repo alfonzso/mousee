@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"flag"
-	// "fmt"
 	"log"
 	"net/url"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/alfonzso/mousee/common"
+	"github.com/alfonzso/mousee/hid"
 	"github.com/go-vgo/robotgo"
 	"github.com/gorilla/websocket"
 	"github.com/moutend/go-hook/pkg/types"
@@ -130,6 +130,10 @@ func decodeMouseData(message []byte) {
 		robotgo.ScrollDir(5, "down")
 	case uintptr(common.WM_MOUSWHEELUP):
 		robotgo.ScrollDir(5, "up")
+	case uintptr(common.WM_MOUSE4BTN):
+		hid.SimulateXButtonPress(hid.XBUTTON1)
+	case uintptr(common.WM_MOUSE5BTN):
+		hid.SimulateXButtonPress(hid.XBUTTON2)
 	}
 	// if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
 	// 	robotgo.Toggle("left")
