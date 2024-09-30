@@ -101,10 +101,10 @@ func decodeMouseData(message []byte) {
 		}
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) || types.WM_SYSKEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(key)
-			fmt.Printf(">d> %s", key)
+			fmt.Printf(">d> %s\n", key)
 		} else {
 			robotgo.KeyToggle(key, "up")
-			fmt.Printf(">u> %s", key)
+			fmt.Printf(">u> %s\n", key)
 		}
 		return
 	}
