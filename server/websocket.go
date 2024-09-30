@@ -126,7 +126,7 @@ func (ws *WSServer) SendDataToClient(signalChan chan os.Signal, mouseChan chan t
 		case isClientCOnnected = <-ws.ClientConnected:
 			continue
 		case k := <-keyboardChan:
-			fmt.Printf(">>k>> %+v \r", k)
+			// fmt.Printf(">>k>> %+v \r", k)
 			if isClientCOnnected {
 				// b, err := json.Marshal(common.MouseData{X: k.X, Y: m.Y, Msg: uintptr(m.Message)})
 				f := common.KeyBoardData{VKCode: k.VKCode, X: -1, Y: -1, Msg: uintptr(k.Message)}
