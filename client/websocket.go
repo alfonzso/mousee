@@ -95,11 +95,9 @@ func decodeMouseData(message []byte) {
 	case uintptr(common.WM_RBUTTONUP):
 		robotgo.Toggle("right")
 	case uintptr(common.WM_MOUSWHEELDOWN):
-		robotgo.ScrollDir(10, "down")
+		robotgo.ScrollDir(5, "down")
 	case uintptr(common.WM_MOUSWHEELUP):
-		robotgo.ScrollDir(10, "up")
-		log.Println("Mouse click blocked!")
-		// cont = false
+		robotgo.ScrollDir(5, "up")
 	}
 	// if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
 	// 	robotgo.Toggle("left")

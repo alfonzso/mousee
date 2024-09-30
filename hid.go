@@ -51,9 +51,9 @@ func WheelMovement(mouseData uint32) uintptr {
 	// sss = 4287102976
 	sss := mouseData >> 16
 	if int(sss)-_2On16 == -120 {
-		return uintptr(common.WM_MOUSWHEELUP)
-	} else if sss == 120 {
 		return uintptr(common.WM_MOUSWHEELDOWN)
+	} else if sss == 120 {
+		return uintptr(common.WM_MOUSWHEELUP)
 	} else {
 		return 0
 	}
