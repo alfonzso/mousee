@@ -23,7 +23,8 @@ const (
 	WM_MOUSEMOVE   types.Message = 0x0200
 	WM_LBUTTONDOWN types.Message = 0x0201
 	WM_LBUTTONUP   types.Message = 0x0202
-	WM_MBUTTON     types.Message = 0x0207
+	WM_MBUTTONDOWN types.Message = 0x0207
+	WM_MBUTTONUP   types.Message = 0x0208
 	WM_MOUSEWHEEL  types.Message = 0x020A
 	WM_MOUSEHWHEEL types.Message = 0x020E
 	WM_RBUTTONDOWN types.Message = 0x0204

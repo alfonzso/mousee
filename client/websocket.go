@@ -20,33 +20,36 @@ import (
 
 var commonData common.CommonData
 
-var remapAtoZKeys = map[types.VKCode]rune{
-	types.VK_A: 'a',
-	types.VK_B: 'b',
-	types.VK_C: 'c',
-	types.VK_D: 'd',
-	types.VK_E: 'e',
-	types.VK_F: 'f',
-	types.VK_G: 'g',
-	types.VK_H: 'h',
-	types.VK_I: 'i',
-	types.VK_J: 'j',
-	types.VK_K: 'k',
-	types.VK_L: 'l',
-	types.VK_M: 'm',
-	types.VK_N: 'n',
-	types.VK_O: 'o',
-	types.VK_P: 'p',
-	types.VK_Q: 'q',
-	types.VK_R: 'r',
-	types.VK_S: 's',
-	types.VK_T: 't',
-	types.VK_U: 'u',
-	types.VK_V: 'v',
-	types.VK_W: 'w',
-	types.VK_X: 'x',
-	types.VK_Y: 'y',
-	types.VK_Z: 'z',
+var remapAtoZKeys = map[types.VKCode]string{
+	types.VK_A:      "a",
+	types.VK_B:      "b",
+	types.VK_C:      "c",
+	types.VK_D:      "d",
+	types.VK_E:      "e",
+	types.VK_F:      "f",
+	types.VK_G:      "g",
+	types.VK_H:      "h",
+	types.VK_I:      "i",
+	types.VK_J:      "j",
+	types.VK_K:      "k",
+	types.VK_L:      "l",
+	types.VK_M:      "m",
+	types.VK_N:      "n",
+	types.VK_O:      "o",
+	types.VK_P:      "p",
+	types.VK_Q:      "q",
+	types.VK_R:      "r",
+	types.VK_S:      "s",
+	types.VK_T:      "t",
+	types.VK_U:      "u",
+	types.VK_V:      "v",
+	types.VK_W:      "w",
+	types.VK_X:      "x",
+	types.VK_Y:      "y",
+	types.VK_Z:      "z",
+	types.VK_SHIFT:  "shift",
+	types.VK_LSHIFT: "shift",
+	types.VK_RSHIFT: "shift",
 }
 
 func decodeMouseData(message []byte) {
@@ -57,20 +60,20 @@ func decodeMouseData(message []byte) {
 	// fmt.Printf("%+v   %d %d            \r", commonData, types.WM_KEYDOWN, commonData.Msg)
 
 	if commonData.VKCode != 0 {
-		
+
 		fmt.Println(types.WM_KEYDOWN == types.Message(commonData.Msg))
-		char, ok := remapAtoZKeys[commonData.VKCode]
+		str, ok := remapAtoZKeys[commonData.VKCode]
 		if !ok {
-			char = rune(commonData.VKCode)
+			str = commonData.VKCode.String()
 		}
-		fmt.Println(string(char))
-		robotgo.KeyDown("shift")
+		fmt.Println(string(str))
+		// robotgo.KeyDown("shift")
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) {
-			robotgo.KeyToggle(string(char))
+			robotgo.KeyToggle(str)
 		} else {
-			robotgo.KeyToggle(string(char), "up")
+			robotgo.KeyToggle(str, "up")
 		}
-		robotgo.KeyUp("shift")
+		// robotgo.KeyUp("shift")
 		return
 	}
 
@@ -78,20 +81,40 @@ func decodeMouseData(message []byte) {
 		robotgo.Move(int(commonData.X), int(commonData.Y))
 	}
 
-	if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
-		robotgo.Toggle("left")
-	}
-
-	if uintptr(common.WM_LBUTTONUP) == commonData.Msg {
+	switch commonData.Msg {
+	case uintptr(common.WM_MBUTTONDOWN):
+		robotgo.Toggle("center")
+	case uintptr(common.WM_MBUTTONUP):
+		robotgo.Toggle("center", "up")
+	case uintptr(common.WM_LBUTTONUP):
 		robotgo.Toggle("left", "up")
-	}
-
-	if uintptr(common.WM_RBUTTONDOWN) == commonData.Msg {
-		robotgo.Toggle("right")
-	}
-	if uintptr(common.WM_RBUTTONUP) == commonData.Msg {
+	case uintptr(common.WM_LBUTTONDOWN):
+		robotgo.Toggle("left")
+	case uintptr(common.WM_RBUTTONDOWN):
 		robotgo.Toggle("right", "up")
+	case uintptr(common.WM_RBUTTONUP):
+		robotgo.Toggle("right")
+	case uintptr(common.WM_MOUSEWHEEL):
+		robotgo.ScrollDir(10, "down")
+	case uintptr(common.WM_MOUSEHWHEEL):
+		robotgo.ScrollDir(10, "up")
+		log.Println("Mouse click blocked!")
+		// cont = false
 	}
+	// if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
+	// 	robotgo.Toggle("left")
+	// }
+
+	// if uintptr(common.WM_LBUTTONUP) == commonData.Msg {
+	// 	robotgo.Toggle("left", "up")
+	// }
+
+	// if uintptr(common.WM_RBUTTONDOWN) == commonData.Msg {
+	// 	robotgo.Toggle("right")
+	// }
+	// if uintptr(common.WM_RBUTTONUP) == commonData.Msg {
+	// 	robotgo.Toggle("right", "up")
+	// }
 }
 
 func WsClientMode() {

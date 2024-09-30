@@ -79,11 +79,23 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				Message:        types.Message(wParam),
 				MSLLHOOKSTRUCT: *(*types.MSLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
 			}
-			if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
-				log.Println("Mouse click blocked!")
-				cont = false
+			if mouseDebugMode < 5 {
+				// select wParam {
+				switch wParam {
+				case uintptr(common.WM_MBUTTONDOWN):
+				case uintptr(common.WM_LBUTTONDOWN):
+				case uintptr(common.WM_RBUTTONDOWN):
+				case uintptr(common.WM_MOUSEWHEEL):
+				case uintptr(common.WM_MOUSEHWHEEL):
+					log.Println("Mouse click blocked!")
+					cont = false
+				}
 			}
-			if wParam == uintptr(common.WM_MBUTTON) {
+			// if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
+			// 	log.Println("Mouse click blocked!")
+			// 	cont = false
+			// }
+			if wParam == uintptr(common.WM_MBUTTONDOWN) {
 				mouseDebugMode += 1
 				if mouseDebugMode >= 5 {
 					log.Println("Debug mode active for mouse", mouseDebugMode)
@@ -93,7 +105,7 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				}
 				// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 			}
-			// log.Println(">>>>>>>>>>>", wParam)
+			log.Println(">>>>>>>>>>>", wParam)
 		}
 
 		// log.Println(">>>>>>>>>>>", wParam)
