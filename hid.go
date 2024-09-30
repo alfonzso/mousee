@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math"
 	"unsafe"
 
 	"github.com/alfonzso/mousee/common"
@@ -43,6 +45,21 @@ type HookHandler func(c chan<- types.MouseEvent) types.HOOKPROC
 var mouseDebugMode = 0
 var keyboardDebugMode = 0
 
+var _2On16 = int(math.Pow(float64(2), float64(16)))
+
+func WheelMovement(mouseData uint32) uintptr {
+	// sss = 4287102976
+	sss := mouseData >> 16
+	if int(sss)-_2On16 == -120 {
+		return uintptr(common.WM_MOUSWHEELUP)
+	} else if sss == 120 {
+		return uintptr(common.WM_MOUSWHEELDOWN)
+	} else {
+		return 0
+	}
+	// fmt.Println(sss - p)
+}
+
 func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 	return func(code int32, wParam, lParam uintptr) uintptr {
 		if lParam != 0 {
@@ -61,7 +78,9 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 			return 1
 		}
 		if keyboardDebugMode == 6 {
+			log.Println()
 			log.Println("Keyboard enabled...")
+			log.Println()
 		}
 		if keyboardDebugMode > 10 {
 			keyboardDebugMode = 0
@@ -73,24 +92,30 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 
 func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 	return func(code int32, wParam, lParam uintptr) uintptr {
+		// mouseData := types.MouseEvent{}
 		cont := true
 		if lParam != 0 {
-			c <- types.MouseEvent{
+			mouseData := types.MouseEvent{
 				Message:        types.Message(wParam),
 				MSLLHOOKSTRUCT: *(*types.MSLLHOOKSTRUCT)(unsafe.Pointer(lParam)),
 			}
 			if mouseDebugMode < 5 {
 				// select wParam {
 				switch wParam {
-				case uintptr(common.WM_MBUTTONDOWN):
-				case uintptr(common.WM_LBUTTONDOWN):
-				case uintptr(common.WM_RBUTTONDOWN):
-				case uintptr(common.WM_MOUSEWHEEL):
-				case uintptr(common.WM_MOUSEHWHEEL):
-					log.Println("Mouse click blocked!")
+				case uintptr(common.WM_MBUTTONDOWN), uintptr(common.WM_LBUTTONDOWN),
+					uintptr(common.WM_RBUTTONDOWN), uintptr(common.WM_MOUSEWHEEL),
+					uintptr(common.WM_MOUSEHWHEEL):
+					fmt.Println("Mouse click blocked!")
 					cont = false
 				}
 			}
+			switch wParam {
+			case uintptr(common.WM_MOUSEWHEEL), uintptr(common.WM_MOUSEHWHEEL):
+				// log.Println(">>>>>>>>>>>", wParam, mouseData)
+				log.Printf(" %+v ", mouseData)
+				mouseData.Message = types.Message(WheelMovement(mouseData.MouseData))
+			}
+			c <- mouseData
 			// if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
 			// 	log.Println("Mouse click blocked!")
 			// 	cont = false
@@ -105,10 +130,23 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				}
 				// log.Println("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 			}
-			log.Println(">>>>>>>>>>>", wParam)
+			// log.Println(">>>>>>>>>>>", wParam)
 		}
 
-		// log.Println(">>>>>>>>>>>", wParam)
+		// log.Println(">>>>>>>>>>>", wParam, code, lParam)
+		// switch wParam {
+		// // case uintptr(common.WM_MBUTTONDOWN):
+		// // case uintptr(common.WM_LBUTTONDOWN):
+		// // case uintptr(common.WM_RBUTTONDOWN):
+		// case uintptr(common.WM_MOUSEWHEEL), uintptr(common.WM_MOUSEHWHEEL):
+		// 	// log.Println(">>>>>>>>>>>", wParam, mouseData)
+		// 	log.Printf(" %+v ", mouseData)
+		// default:
+		// 	// freebsd, openbsd,
+		// 	// plan9, windows...
+		// 	// fmt.Printf("%s.\n", os)
+		// 	// continue
+		// }
 
 		if !cont {
 			return 1

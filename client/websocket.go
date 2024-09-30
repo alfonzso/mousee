@@ -94,9 +94,9 @@ func decodeMouseData(message []byte) {
 		robotgo.Toggle("right", "up")
 	case uintptr(common.WM_RBUTTONUP):
 		robotgo.Toggle("right")
-	case uintptr(common.WM_MOUSEWHEEL):
+	case uintptr(common.WM_MOUSWHEELDOWN):
 		robotgo.ScrollDir(10, "down")
-	case uintptr(common.WM_MOUSEHWHEEL):
+	case uintptr(common.WM_MOUSWHEELUP):
 		robotgo.ScrollDir(10, "up")
 		log.Println("Mouse click blocked!")
 		// cont = false

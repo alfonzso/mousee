@@ -20,17 +20,19 @@ const (
 )
 
 const (
-	WM_MOUSEMOVE   types.Message = 0x0200
-	WM_LBUTTONDOWN types.Message = 0x0201
-	WM_LBUTTONUP   types.Message = 0x0202
-	WM_MBUTTONDOWN types.Message = 0x0207
-	WM_MBUTTONUP   types.Message = 0x0208
-	WM_MOUSEWHEEL  types.Message = 0x020A
-	WM_MOUSEHWHEEL types.Message = 0x020E
-	WM_RBUTTONDOWN types.Message = 0x0204
-	WM_RBUTTONUP   types.Message = 0x0205
-	WM_KEYDOWN     types.Message = 0x0100
-	WM_KEYUP       types.Message = 0x0101
-	WM_SYSKEYDOWN  types.Message = 0x0104
-	WM_SYSKEYUP    types.Message = 0x0105
+	WM_MOUSWHEELUP   types.Message = 0x0198
+	WM_MOUSWHEELDOWN types.Message = 0x0199
+	WM_MOUSEMOVE     types.Message = 0x0200
+	WM_LBUTTONDOWN   types.Message = 0x0201
+	WM_LBUTTONUP     types.Message = 0x0202
+	WM_MBUTTONDOWN   types.Message = 0x0207
+	WM_MBUTTONUP     types.Message = 0x0208
+	WM_MOUSEWHEEL    types.Message = 0x020A
+	WM_MOUSEHWHEEL   types.Message = 0x020E
+	WM_RBUTTONDOWN   types.Message = 0x0204
+	WM_RBUTTONUP     types.Message = 0x0205
+	WM_KEYDOWN       types.Message = 0x0100
+	WM_KEYUP         types.Message = 0x0101
+	WM_SYSKEYDOWN    types.Message = 0x0104
+	WM_SYSKEYUP      types.Message = 0x0105
 )
