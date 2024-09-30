@@ -1,7 +1,7 @@
-package main
+package hid
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 	"math"
 	"unsafe"
@@ -69,7 +69,7 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 			}
 			// if keyBevt.VKCode.String() == "enter" {
 			// log.Println(keyBevt)
-			log.Printf("%x %v",uint32(keyBevt.VKCode), keyBevt.VKCode)
+			// log.Printf("%x %v",uint32(keyBevt.VKCode), keyBevt.VKCode)
 			if keyBevt.VKCode == types.VK_ESCAPE {
 				keyboardDebugMode += 1
 			}
@@ -105,17 +105,33 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				switch wParam {
 				case uintptr(common.WM_MBUTTONDOWN), uintptr(common.WM_LBUTTONDOWN),
 					uintptr(common.WM_RBUTTONDOWN), uintptr(common.WM_MOUSEWHEEL),
-					uintptr(common.WM_MOUSEHWHEEL):
-					fmt.Println("Mouse click blocked!")
+					uintptr(common.WM_MOUSEHWHEEL), uintptr(common.WM_XBUTTON4_5_DOWN),
+					uintptr(common.WM_XBUTTON4_5_UP):
+					// fmt.Println("Mouse click blocked!")
 					cont = false
 				}
 			}
+
 			switch wParam {
 			case uintptr(common.WM_MOUSEWHEEL), uintptr(common.WM_MOUSEHWHEEL):
-				// log.Println(">>>>>>>>>>>", wParam, mouseData)
-				log.Printf(" %+v ", mouseData)
 				mouseData.Message = types.Message(WheelMovement(mouseData.MouseData))
 			}
+
+			switch wParam {
+			case uintptr(common.WM_XBUTTON4_5_DOWN):
+				// log.Println(">>>>>>>>>>>", wParam, mouseData)
+				// test := mouseData.MouseData >> 16
+				// log.Println(test, mouseData.MouseData)
+				// log.Printf(" %+v %d", mouseData, test)
+				// mouseData.Message = types.Message(WheelMovement(mouseData.MouseData))
+				if mouseData.MouseData >> 16 == 1{
+					mouseData.Message = common.WM_MOUSE4BTN
+				}
+				if mouseData.MouseData >> 16 == 2{
+					mouseData.Message = common.WM_MOUSE5BTN
+				}
+			}
+			// log.Printf(" %+v ", mouseData)
 			c <- mouseData
 			// if mouseDebugMode < 5 && (wParam == uintptr(common.WM_LBUTTONDOWN) || wParam == uintptr(common.WM_RBUTTONDOWN)) {
 			// 	log.Println("Mouse click blocked!")
