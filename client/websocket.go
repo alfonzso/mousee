@@ -112,6 +112,7 @@ func decodeMouseData(message []byte, clientScreen common.VScreenSize) {
 	if commonData.X != -1 && commonData.Y != -1 {
 		wScale := clientScreen.W / commonData.ServerScreen.W
 		hScale := clientScreen.H / commonData.ServerScreen.H
+		log.Println(wScale, hScale, int(commonData.X*hScale), int(commonData.Y*wScale))
 		robotgo.Move(int(commonData.X*hScale), int(commonData.Y*wScale))
 	}
 
