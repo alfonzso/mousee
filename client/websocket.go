@@ -87,7 +87,7 @@ var remapAtoZKeys = map[types.VKCode]string{
 
 // var keyAsUint32 string
 
-func decodeMouseData(message []byte) {
+func decodeMouseData(message []byte, clientScreen common.VScreenSize) {
 	if err := json.Unmarshal(message, &commonData); err != nil {
 		panic(err)
 	}
@@ -110,7 +110,9 @@ func decodeMouseData(message []byte) {
 	}
 
 	if commonData.X != -1 && commonData.Y != -1 {
-		robotgo.Move(int(commonData.X), int(commonData.Y))
+		wScale := clientScreen.W / commonData.ServerScreen.W
+		hScale := clientScreen.H / commonData.ServerScreen.H
+		robotgo.Move(int(commonData.X*hScale), int(commonData.Y*wScale))
 	}
 
 	switch commonData.Msg {
@@ -158,6 +160,8 @@ func WsClientMode() {
 
 	addr := flag.String("cliAddr", "192.168.1.100:5555", "http service address")
 
+	vScreen := hid.CalculateScreen()
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -183,7 +187,7 @@ func WsClientMode() {
 				log.Println("read:", err)
 				return
 			}
-			decodeMouseData(message)
+			decodeMouseData(message, vScreen)
 			// log.Printf("recv: %s", message)
 		}
 	}()

@@ -29,6 +29,7 @@ type WsConfig struct {
 var Upgrader = websocket.Upgrader{} // use default options
 
 type WSServer struct {
+	Screen  common.VScreenSize
 	Clients map[*websocket.Conn]bool
 	// handleMessage   func(message []byte) // New message handler
 	ClientConnected chan bool
@@ -47,6 +48,7 @@ type REQ func(http.ResponseWriter, *http.Request)
 func ServeWS() *WSServer {
 	flag.Parse()
 	server := WSServer{
+		common.VScreenSize{},
 		make(map[*websocket.Conn]bool),
 		make(chan bool),
 	}
@@ -129,7 +131,7 @@ func (ws *WSServer) SendDataToClient(signalChan chan os.Signal, mouseChan chan t
 			// fmt.Printf(">>k>> %+v \r", k)
 			if isClientCOnnected {
 				// b, err := json.Marshal(common.MouseData{X: k.X, Y: m.Y, Msg: uintptr(m.Message)})
-				f := common.KeyBoardData{VKCode: k.VKCode, X: -1, Y: -1, Msg: uintptr(k.Message)}
+				f := common.KeyBoardData{VKCode: k.VKCode, X: -1, Y: -1, Msg: uintptr(k.Message), ServerScreen: ws.Screen}
 				// f.X
 				// b, err := json.Marshal(common.KeyBoardData{X: 0, Y: 0, Msg: uintptr(k.Message), VKCode: k.VKCode})
 				b, err := json.Marshal(f)
@@ -150,7 +152,7 @@ func (ws *WSServer) SendDataToClient(signalChan chan os.Signal, mouseChan chan t
 			// fmt.Printf("%v \r", string(b))
 			// if false {
 			if isClientCOnnected {
-				b, err := json.Marshal(common.MouseData{VKCode: 0, X: m.X, Y: m.Y, Msg: uintptr(m.Message)})
+				b, err := json.Marshal(common.MouseData{VKCode: 0, X: m.X, Y: m.Y, Msg: uintptr(m.Message), ServerScreen: ws.Screen})
 				if err == nil {
 					// ws.SendResponse(string(b) + "\n")
 					for conn := range ws.Clients {

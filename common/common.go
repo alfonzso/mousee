@@ -10,10 +10,11 @@ var AppVersion string
 var AppName string
 
 type CommonData struct {
-	Msg    uintptr
-	X      int32 `json:"X"`
-	Y      int32 `json:"Y"`
-	VKCode types.VKCode
+	ServerScreen VScreenSize
+	Msg          uintptr
+	X            int32 `json:"X"`
+	Y            int32 `json:"Y"`
+	VKCode       types.VKCode
 }
 
 type MouseData CommonData
@@ -27,6 +28,22 @@ type UpdateData struct {
 	AppName    string
 	AppVersion string
 	AppCrc32   uint32
+}
+
+type Rect struct {
+	Left, Top, Right, Bottom int32
+}
+
+type MonitorInfo struct {
+	Size    uint32
+	Monitor Rect
+	Work    Rect
+	Flags   uint32
+}
+
+type VScreenSize struct {
+	H int32
+	W int32
 }
 
 // HOOKPROC represents HOOKPROC callback function type.

@@ -79,6 +79,12 @@ func serverMode() error {
 	infoLogger.Println("Server mode active ...")
 
 	server := server.ServeWS()
+	// w, h := hid.CalculateScreen()
+	// serverVirtualScreenSize := VScreenSize{w, h}
+	// serverVirtualScreenSize := hid.CalculateScreen()
+	server.Screen = hid.CalculateScreen()
+	// fmt.Println(serverVirtualScreenSize)
+	// serverVirtualScreenSize := hid.CalculateScreen()
 	// server.ServeWS()
 
 	// u := server.UdpConfig{
