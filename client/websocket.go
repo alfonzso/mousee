@@ -67,21 +67,41 @@ var remapAtoZKeys = map[types.VKCode]string{
 	types.VK_LEFT:     "left",
 	types.VK_RIGHT:    "right",
 	types.VK_HOME:     "home",
-	types.VK_DELETE:   "del",
+	types.VK_DELETE:   "delete",
 	types.VK_END:      "end",
+
+	types.VK_NUMPAD0:   "num0", // Numeric keypad 0 key
+	types.VK_NUMPAD1:   "num1", // Numeric keypad 1 key
+	types.VK_NUMPAD2:   "num2", // Numeric keypad 2 key
+	types.VK_NUMPAD3:   "num3", // Numeric keypad 3 key
+	types.VK_NUMPAD4:   "num4", // Numeric keypad 4 key
+	types.VK_NUMPAD5:   "num5", // Numeric keypad 5 key
+	types.VK_NUMPAD6:   "num6", // Numeric keypad 6 key
+	types.VK_NUMPAD7:   "num7", // Numeric keypad 7 key
+	types.VK_NUMPAD8:   "num8", // Numeric keypad 8 key
+	types.VK_NUMPAD9:   "num9", // Numeric keypad 9 key
+	types.VK_MULTIPLY:  "num*", // Multiply key
+	types.VK_ADD:       "num+", // Add key
+	types.VK_SEPARATOR: "num/", // Separator key
+	types.VK_SUBTRACT:  "num-", // Subtract key
+	types.VK_DECIMAL:   "num.", // Decimal key
+	types.VK_DIVIDE:    "num/", // Divide key
+	types.VK_NUMLOCK:   "num_lock",
+	types.VK_PRIOR:     "pageup",
+	types.VK_NEXT:      "pagedown",
 
 	types.VK_OEM_COMMA:  ",",
 	types.VK_OEM_MINUS:  "-",
 	types.VK_OEM_PLUS:   "=",
 	types.VK_OEM_PERIOD: ".",
 
-	types.VK_OEM_1: ";",  //     For the US standard keyboard, the ';:' key
-	types.VK_OEM_2: "/",  //     For the US standard keyboard, the '/?' key
-	types.VK_OEM_3: "`",  //      For the US standard keyboard, the '`~' key
-	types.VK_OEM_4: "[",  //      For the US standard keyboard, the '[{' key
-	types.VK_OEM_5: "\\", //      For the US standard keyboard, the '\|' key
-	types.VK_OEM_6: "]",  //     For the US standard keyboard, the ']}' key
-	types.VK_OEM_7: "'",  //      For the US standard keyboard, the 'single-quote/double-quote' key
+	types.VK_OEM_1: ";",  // For the US standard keyboard, the ';:' key
+	types.VK_OEM_2: "/",  // For the US standard keyboard, the '/?' key
+	types.VK_OEM_3: "`",  // For the US standard keyboard, the '`~' key
+	types.VK_OEM_4: "[",  // For the US standard keyboard, the '[{' key
+	types.VK_OEM_5: "\\", // For the US standard keyboard, the '\|' key
+	types.VK_OEM_6: "]",  // For the US standard keyboard, the ']}' key
+	types.VK_OEM_7: "'",  // For the US standard keyboard, the 'single-quote/double-quote' key
 	// VK_OEM_8
 }
 
@@ -101,33 +121,36 @@ func decodeMouseData(message []byte, clientScreen common.VScreenSize) {
 		}
 		if types.WM_KEYDOWN == types.Message(commonData.Msg) || types.WM_SYSKEYDOWN == types.Message(commonData.Msg) {
 			robotgo.KeyToggle(key)
-			// fmt.Printf(">d> %s\n", key)
+			// log.Printf(">d> %s %x \n", key, uint32(commonData.VKCode))
 		} else {
 			robotgo.KeyToggle(key, "up")
-			// fmt.Printf(">u> %s\n", key)
+			// log.Printf(">u> %s %x \n", key, uint32(commonData.VKCode))
+			// log.Printf(">u> %s\n", key)
 		}
 		return
 	}
-
+	// ghidefabcabc
 	if commonData.X != -1 && commonData.Y != -1 {
-		wScale := clientScreen.W / commonData.ServerScreen.W
-		hScale := clientScreen.H / commonData.ServerScreen.H
-		log.Println(wScale, hScale, int(commonData.X*hScale), int(commonData.Y*wScale))
-		robotgo.Move(int(commonData.X*wScale), int(commonData.Y*hScale))
+		// scale down or up x,y points to fit the server side screen
+		// cuz have to remap server side screen to client side, after that can manage properly the client side
+		// server side can be bigger than client or vice versa
+		x := int(float64(commonData.X) * float64(clientScreen.W) / float64(commonData.ServerScreen.W))
+		y := int(float64(commonData.Y) * float64(clientScreen.H) / float64(commonData.ServerScreen.H))
+		robotgo.Move(x, y)
 	}
 
 	switch commonData.Msg {
-	case uintptr(common.WM_MBUTTONDOWN):
-		robotgo.Toggle("center")
 	case uintptr(common.WM_MBUTTONUP):
 		robotgo.Toggle("center", "up")
+	case uintptr(common.WM_MBUTTONDOWN):
+		robotgo.Toggle("center")
 	case uintptr(common.WM_LBUTTONUP):
 		robotgo.Toggle("left", "up")
 	case uintptr(common.WM_LBUTTONDOWN):
 		robotgo.Toggle("left")
-	case uintptr(common.WM_RBUTTONDOWN):
-		robotgo.Toggle("right", "up")
 	case uintptr(common.WM_RBUTTONUP):
+		robotgo.Toggle("right", "up")
+	case uintptr(common.WM_RBUTTONDOWN):
 		robotgo.Toggle("right")
 	case uintptr(common.WM_MOUSWHEELDOWN):
 		robotgo.ScrollDir(5, "down")
