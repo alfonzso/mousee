@@ -95,6 +95,9 @@ var remapAtoZKeys = map[types.VKCode]string{
 	types.VK_OEM_PLUS:   "=",
 	types.VK_OEM_PERIOD: ".",
 
+	types.VK_LWIN: "lcmd", //              VKCode = 0x5B // Left Windows key (Natural keyboard)
+	types.VK_RWIN: "rcmd", //              VKCode = 0x5C // Right Windows key (Natural keyboard)
+
 	types.VK_OEM_1: ";",  // For the US standard keyboard, the ';:' key
 	types.VK_OEM_2: "/",  // For the US standard keyboard, the '/?' key
 	types.VK_OEM_3: "`",  // For the US standard keyboard, the '`~' key
@@ -125,11 +128,10 @@ func decodeMouseData(message []byte, clientScreen common.VScreenSize) {
 		} else {
 			robotgo.KeyToggle(key, "up")
 			// log.Printf(">u> %s %x \n", key, uint32(commonData.VKCode))
-			// log.Printf(">u> %s\n", key)
 		}
 		return
 	}
-	// ghidefabcabc
+
 	if commonData.X != -1 && commonData.Y != -1 {
 		// scale down or up x,y points to fit the server side screen
 		// cuz have to remap server side screen to client side, after that can manage properly the client side
@@ -161,20 +163,7 @@ func decodeMouseData(message []byte, clientScreen common.VScreenSize) {
 	case uintptr(common.WM_MOUSE5BTN):
 		hid.SimulateXButtonPress(hid.XBUTTON2)
 	}
-	// if uintptr(common.WM_LBUTTONDOWN) == commonData.Msg {
-	// 	robotgo.Toggle("left")
-	// }
 
-	// if uintptr(common.WM_LBUTTONUP) == commonData.Msg {
-	// 	robotgo.Toggle("left", "up")
-	// }
-
-	// if uintptr(common.WM_RBUTTONDOWN) == commonData.Msg {
-	// 	robotgo.Toggle("right")
-	// }
-	// if uintptr(common.WM_RBUTTONUP) == commonData.Msg {
-	// 	robotgo.Toggle("right", "up")
-	// }
 }
 
 func WsClientMode() {
