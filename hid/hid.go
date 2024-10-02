@@ -44,6 +44,7 @@ type HookHandler func(c chan<- types.MouseEvent) types.HOOKPROC
 
 var mouseDebugMode = 0
 var keyboardDebugMode = 0
+var f1NotPressedYet = true
 
 var _2On16 = int(math.Pow(float64(2), float64(16)))
 
@@ -70,12 +71,15 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 			// if keyBevt.VKCode.String() == "enter" {
 			// log.Println(keyBevt)
 			// log.Printf("%x %v",uint32(keyBevt.VKCode), keyBevt.VKCode)
+			if keyBevt.VKCode == types.VK_F1 {
+				f1NotPressedYet = false
+			}
 			if keyBevt.VKCode == types.VK_ESCAPE {
 				keyboardDebugMode += 1
 			}
 			c <- keyBevt
 		}
-		if keyboardDebugMode < 5 {
+		if f1NotPressedYet || keyboardDebugMode < 5 {
 			return 1
 		}
 		if keyboardDebugMode == 6 {
@@ -85,6 +89,7 @@ func KeyboardDefaultHookHandler(c chan<- types.KeyboardEvent) types.HOOKPROC {
 		}
 		if keyboardDebugMode > 10 {
 			keyboardDebugMode = 0
+			f1NotPressedYet = true
 			return 1
 		}
 		return win32.CallNextHookEx(0, code, wParam, lParam)
@@ -124,10 +129,10 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 				// log.Println(test, mouseData.MouseData)
 				// log.Printf(" %+v %d", mouseData, test)
 				// mouseData.Message = types.Message(WheelMovement(mouseData.MouseData))
-				if mouseData.MouseData >> 16 == 1{
+				if mouseData.MouseData>>16 == 1 {
 					mouseData.Message = common.WM_MOUSE4BTN
 				}
-				if mouseData.MouseData >> 16 == 2{
+				if mouseData.MouseData>>16 == 2 {
 					mouseData.Message = common.WM_MOUSE5BTN
 				}
 			}
@@ -165,7 +170,7 @@ func MouseDefaultHookHandler(c chan<- types.MouseEvent) types.HOOKPROC {
 		// 	// continue
 		// }
 
-		if !cont {
+		if !cont || f1NotPressedYet {
 			return 1
 		}
 
